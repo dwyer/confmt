@@ -20,7 +20,7 @@ Goals:
 
     * No syntax errors:
         * The only bad syntax is non-comment line that doesn't contain an
-          assignment operator, which is simply ignored unless script mode is
+          assignment operator, which is simply ignored unless strict mode is
           enabled.
 
 Examples:
