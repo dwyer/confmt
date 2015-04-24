@@ -1,4 +1,4 @@
-confmt is a very simple and easy data-interchange format for use in
+simpleconf is a very simple and easy data-interchange format for use in
 configuration files.
 
 Audience: developers who need a user-facing configuration file format that's
@@ -25,7 +25,7 @@ Goals:
 
 Examples:
 
-    >>> import confmt
+    >>> import simpleconf as conf
     >>> conf.loads("""
     ... # this is a comment
     ...
