@@ -1,0 +1,111 @@
+confmt is a very simple and easy data-interchange format for use in
+configuration files.
+
+Audience: developers who need a user-facing configuration file format that's
+easy to read and write, who don't need arrays or objects and are therefore
+willing to exchange the power of JSON, YAML or INI for a simple, virtually
+syntax-free format.
+
+Goals:
+    
+    * Very little syntax:
+        * An assignment is any two phrases separated by an assignment operator
+          (default: `=`).
+        * A comment is any line that begins with a comment token (default: `#`).
+        * Integers and real numbers are evaluated, but don't have to be.
+        * The keywords `true`, `false` and `null` are evaluated, but can be
+          changed or removed.
+        * All syntax can be changed or removed, except the assignment operator,
+          which can be changed but not removed.
+
+    * No syntax errors:
+        * The only bad syntax is non-comment line that doesn't contain an
+          assignment operator, which is simply ignored unless script mode is
+          enabled.
+
+Examples:
+
+    >>> import confmt
+    >>> conf.loads("""
+    ... # this is a comment
+    ...
+    ... # an assignment is just two phrases separated by an equal sign
+    ... energy = mass times the speed of light squared
+    ...
+    ... # only the first equal sign is evaluated, so this is legal:
+    ... relativity = e = mc^2
+    ...
+    ... a line without an equal sign is simply ignored
+    ...
+    ... # variables can contain spaces...
+    ... two birds = 2
+    ... one stone = 1
+    ...
+    ... # ...or any character really (except the equal sign)
+    ... casey's name = casey "kc" dwyer
+    ...
+    ... # floats, booleans and null do what's expected
+    ... phish = 1.618
+    ... yes = true
+    ... no = false
+    ... maybe = null
+    ... """) # and here comes the result
+    {
+        u'yes': True,
+        u"casey's name": u'casey "kc" dwyer',
+        u'no': False,
+        u'maybe': None,
+        u'energy': u'mass times the speed of light squared',
+        u'relativity': u'e = mc^2',
+        u'one stone': 1,
+        u'two birds': 2,
+        u'phish': 1.618
+    }
+
+The resulting object is a dict by default, but that can be overridden with the
+object_hook argument. For example, you could use an OrderedDict to preserve
+the order.
+
+    >>> from collections import OrderedDict
+    >>> conf.loads("""
+    ... one = 1
+    ... two = 2
+    ... tree = 3
+    ... """, object_hook=OrderedDict)
+    OrderedDict([(u'one', 1), (u'two', 2), (u'tree', 3)])
+
+The int and float parsers default to `int` and `float` respectively, but can be
+overridden with the parse_int and parse_float arguments.
+
+    >>> conf.loads('answer = 42', parse_int=float)
+    {u'answer': 42.0}
+    >>> conf.loads('pish = 3.14', parse_float=lambda x: int(float(x)))
+    {u'pish': 3}
+
+The true, false and null keywords may also be overridden with true_token,
+false_token, and none_token.
+
+    >>> conf.loads("""
+    ... yep = yes
+    ... nah = no
+    ... meh = none
+    ... """, true_token='yes', false_token='no', none_token='none')
+    {u'yep': True, u'nah': False, u'meh': None}
+
+If you don't like `#` for comments, you may change that as well with the
+comment_token argument.
+
+    >>> conf.loads("""
+    ... // this = comment
+    ... # this = variable
+    ... """, comment_token='//')
+    {u'# this': u'variable'}
+
+You may also change the assignment operator `=` with the assignment_operator
+argument.
+
+    >>> conf.loads("""
+    ... a: 1
+    ... b: 52
+    ... """, assignment_operator=':')
+    {u'a': 1, u'b': 52}
