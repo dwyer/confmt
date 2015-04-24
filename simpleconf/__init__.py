@@ -1,1 +1,1 @@
-from .conf import dump, dumps, load, loads
+from .conf import ConfDecoder, ConfEncoder, dump, dumps, load, loads
