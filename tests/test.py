@@ -15,13 +15,10 @@ sys.path.append(PARENT_DIR)
 import simpleconf as conf
 
 baseenv = None
+content = None
 
 def compare(a, b):
-    for (var1, val1), (var2, val2) in zip(sorted(a.items()),
-                                          sorted(b.items())):
-        assert var1 == var2, (val1, var2)
-        assert val1 == val2, (val1, val2)
-    return True
+    assert a == b, 'no match: %s' % '\n'.join(map(str, (a, b)))
 
 # test defaults
 with open(CONFIG_FILENAME) as f:
@@ -34,13 +31,15 @@ with open(CONFIG_FILENAME) as f:
     assert env['no'] is False
     assert env['none'] is None
     assert env[''] == ''
-    assert compare(baseenv, env)
+    compare(baseenv, env)
+    content = sorted(conf.dumps(env).splitlines())
 
 # test object_hook
 with open(CONFIG_FILENAME) as f:
     env = conf.load(f, object_hook=collections.OrderedDict)
     assert isinstance(env, collections.OrderedDict)
-    assert compare(baseenv, env)
+    compare(baseenv, env)
+    compare(content, sorted(conf.dumps(env).splitlines()))
 
 # test parse_int/float
 with open(CONFIG_FILENAME) as f:
@@ -48,7 +47,8 @@ with open(CONFIG_FILENAME) as f:
     tempenv = baseenv.copy()
     tempenv['int'] = str(tempenv['int'])
     tempenv['float'] = str(tempenv['float'])
-    assert compare(env, tempenv)
+    compare(env, tempenv)
+    compare(content, sorted(conf.dumps(env).splitlines()))
 
 # test parse_*
 with open(CONFIG_FILENAME) as f:
@@ -66,6 +66,7 @@ with open(CONFIG_FILENAME) as f:
     tempenv['yes'] = 'true'
     tempenv['no'] = 'false'
     tempenv['none'] = 'null'
+    compare(content, sorted(conf.dumps(env).splitlines()))
 
 # test true/false/none tokens
 with open(CONFIG_FILENAME) as f:
@@ -74,19 +75,22 @@ with open(CONFIG_FILENAME) as f:
     s = s.replace('false', 'no')
     s = s.replace('null', 'none')
     env = conf.loads(s, true_token='yes', false_token='no', none_token='none')
-    assert compare(env, baseenv)
+    compare(env, baseenv)
+    compare(content, sorted(conf.dumps(env).splitlines()))
 
 # test comment_token
 with open(CONFIG_FILENAME) as f:
     s = f.read().replace('#', ';')
     env = conf.loads(s, comment_token=';')
-    assert compare(env, baseenv)
+    compare(env, baseenv)
+    compare(content, sorted(conf.dumps(env).splitlines()))
 
 # test assignment_operator
 with open(CONFIG_FILENAME) as f:
     s = '\n'.join(line.replace('=', ':', 1) for line in f)
     env = conf.loads(s, assignment_operator=':')
-    assert compare(env, baseenv)
+    compare(env, baseenv)
+    compare(content, sorted(conf.dumps(env).splitlines()))
 
 # test strict_mode
 with open(CONFIG_FILENAME) as f:
@@ -103,4 +107,5 @@ with open(CONFIG_FILENAME) as f:
                     variable_validator=lambda s: re.match(r'[\w_][\w\d_]*', s))
     tempenv = baseenv.copy()
     del tempenv['']
-    assert compare(env, tempenv)
+    compare(env, tempenv)
+    compare(content[1:], sorted(conf.dumps(env).splitlines()))
