@@ -1,1 +1,1 @@
-from .conf import load, loads
+from .conf import dump, dumps, load, loads
