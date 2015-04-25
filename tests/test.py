@@ -115,10 +115,22 @@ with open(CONFIG_FILENAME) as f:
     env = conf.loads('a.b c.d = 1', key_separator='.', key_validator=valid)
     assert not env
 
-
 # test key_separator
 with os.popen('git config --list --local') as f:
     env = conf.load(f, key_separator='.', parse_int=float)
     opts = dict(key_separator='->', keywords={'yes': True, 'no': False})
     s = conf.dumps(env, **opts)
     compare(env, conf.loads(s, **opts))
+
+# test escape_token
+s = 'a \= b = \#t # this should be #t'
+keywords={'#t': True, '#f': False}
+obj = conf.loads(s, keywords=keywords)
+assert 'a = b' in obj and obj['a = b'] is True, obj
+t = conf.dumps({'a = b': True}, keywords=keywords)
+assert s.startswith(t), (s, t)
+
+obj = conf.loads('a.b = \#t \n a\.b = \#f',
+                 keywords=keywords, key_separator='.')
+assert 'a' in obj and 'b' in obj['a'] and obj['a']['b'] is True, obj
+assert 'a.b' in obj and obj['a.b'] is False, obj

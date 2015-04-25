@@ -1,17 +1,21 @@
 _DEFAULT_ASSIGNMENT_OPERATOR = '='
 _DEFAULT_COMMENT_TOKEN = '#'
+_DEFAULT_ESCAPE_TOKEN = '\\'
 _DEFAULT_KEYWORDS = {'true': True, 'false': False, 'null': None}
 
 
 class ConfConf(object):
 
     def __init__(self, assignment_operator=None, comment_token=None,
-                 keywords=None, key_separator=None, key_validator=None):
+                 escape_token=None, keywords=None, key_separator=None,
+                 key_validator=None):
         self.assignment_operator = (
             _DEFAULT_ASSIGNMENT_OPERATOR if assignment_operator is None else
             assignment_operator) 
         self.comment_token = (
             _DEFAULT_COMMENT_TOKEN if comment_token is None else comment_token)
+        self.escape_token = (
+            _DEFAULT_ESCAPE_TOKEN if escape_token is None else escape_token)
         self.keywords = _DEFAULT_KEYWORDS if keywords is None else keywords
         self.key_separator = key_separator
         self.key_validator = key_validator
@@ -21,17 +25,45 @@ class ConfDecoder(ConfConf):
 
     def __init__(self, parse_int=None, parse_float=None, strict=False,
                  object_type=None, assignment_operator=None,
-                 comment_token=None, keywords=None, key_separator=None,
-                 key_validator=None):
+                 comment_token=None, escape_token=None, keywords=None,
+                 key_separator=None, key_validator=None):
         super(ConfDecoder, self).__init__(
             assignment_operator=assignment_operator,
             comment_token=comment_token, 
             keywords=keywords, key_separator=key_separator,
-            key_validator=key_validator)
+            key_validator=key_validator, escape_token=escape_token)
         self.parse_int = parse_int or int
         self.parse_float = parse_float or float
         self.strict = strict
         self.object_type = object_type or dict
+
+    def __split(self, s, sep, maxsplit=-1):
+        if not self.escape_token:
+            return s.split(sep, maxsplit)
+        if maxsplit == 0:
+            return [s]
+        esep = self.escape_token + sep
+        toks = []
+        chrs = []
+        i = 0
+        while i < len(s):
+            if s[i:i+len(sep)] == sep:
+                toks.append(''.join(chrs))
+                i += len(sep)
+                if maxsplit > -1:
+                    maxsplit -= 1
+                    if not maxsplit:
+                        chrs = s[i:]
+                        break
+                chrs = []
+            elif s[i:i+len(esep)] == esep:
+                chrs.append(sep)
+                i += len(esep)
+            else:
+                chrs.append(s[i])
+                i += 1
+        toks.append(''.join(chrs))
+        return toks
 
     def __validate_keys(self, *args):
         if self.key_validator:
@@ -46,10 +78,17 @@ class ConfDecoder(ConfConf):
         obj = self.object_type()
         for i, line in enumerate(s.splitlines()):
             s = line.strip()
-            if not s or self.comment_token and s.startswith(self.comment_token):
+            if not s:
                 continue
+            if self.comment_token:
+                if self.escape_token:
+                    s = self.__split(s, self.comment_token, 1)[0].strip()
+                    if not s:
+                        continue
+                elif s.startswith(self.comment_token):
+                    continue
             try:
-                key, val = s.split(self.assignment_operator, 1)
+                key, val = self.__split(s, self.assignment_operator, 1)
             except ValueError:
                 if self.strict:
                     raise ValueError(
@@ -64,7 +103,8 @@ class ConfDecoder(ConfConf):
             elif _isa(val, float):
                 val = self.parse_float(val)
             if self.key_separator:
-                keys = [key.strip() for key in key.split(self.key_separator)]
+                keys = self.__split(key, self.key_separator)
+                keys = [key.strip() for key in keys]
                 if not self.__validate_keys(*keys):
                     continue
                 base_obj = obj
@@ -87,13 +127,13 @@ class ConfDecoder(ConfConf):
 class ConfEncoder(ConfConf):
 
     def __init__(self, sort_keys=False, assignment_operator=None,
-                 comment_token=None, keywords=None, key_separator=None,
-                 key_validator=None):
+                 comment_token=None, escape_token=None, keywords=None,
+                 key_separator=None, key_validator=None):
         super(ConfEncoder, self).__init__(
             assignment_operator=assignment_operator,
             comment_token=comment_token, 
             keywords=keywords, key_separator=key_separator,
-            key_validator=key_validator)
+            key_validator=key_validator, escape_token=escape_token)
         self.sort_keys = sort_keys
         self.separator = ' %s ' % self.assignment_operator
 
@@ -110,6 +150,7 @@ class ConfEncoder(ConfConf):
                 val = obj
         if val is not None:
             val = val.strip()
+            val = self.__escape(val, self.comment_token)
             if base_key is not None:
                 return self.separator.join((base_key, val))
             return val
@@ -131,17 +172,23 @@ class ConfEncoder(ConfConf):
         for key, val in pairs:
             if not isinstance(key, basestring):
                 raise TypeError('key must be a string: %s' % repr(key))
-            if not self.assignment_operator not in key:
-                raise ValueError(
-                    'key must not contain the assignment operator: ' %
-                    repr(key))
             key = key.strip()
+            key = self.__escape(key, self.assignment_operator,
+                                self.comment_token, self.key_separator)
             if self.key_validator and not self.key_validator(key):
                 raise ValueError('invalid key: %s' % repr(key))
             if self.key_separator and base_key is not None:
                 key = self.key_separator.join((base_key, key))
             lines.append(self.__encode(val, base_key=key))
         return '\n'.join(lines)
+
+    def __escape(self, s, *args):
+        if not self.escape_token:
+            return s
+        for tok in args:
+            if tok is not None:
+                s = s.replace(tok, '\\' + tok)
+        return s
 
     def encode(self, obj):
         return self.__encode(obj)
