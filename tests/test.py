@@ -10,7 +10,7 @@ TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(TESTS_DIR)
 CONFIG_FILENAME = os.path.join(TESTS_DIR, 'test.conf')
 
-sys.path.append(PARENT_DIR)
+sys.path.insert(0, PARENT_DIR)
 
 import simpleconf as conf
 

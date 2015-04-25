@@ -179,6 +179,10 @@ Here's a neat way to use nested objects to load your git config into Python.
     'refs/heads/master', 'remote': 'origin'}}}
 """
 
+__all__ = ['ConfDecoder', 'ConfEncoder', 'dump', 'dumps', 'load', 'loads']
+__author__ = 'Casey Dwyer <caseydwyer@gmail.com>'
+__version__ = '0.0.0'
+
 try:
     basestring
 except NameError:
