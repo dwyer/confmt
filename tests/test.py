@@ -34,9 +34,9 @@ with open(CONFIG_FILENAME) as f:
     compare(baseenv, env)
     content = sorted(conf.dumps(env).splitlines())
 
-# test object_hook
+# test object_type
 with open(CONFIG_FILENAME) as f:
-    env = conf.load(f, object_hook=collections.OrderedDict)
+    env = conf.load(f, object_type=collections.OrderedDict)
     assert isinstance(env, collections.OrderedDict)
     compare(baseenv, env)
     compare(content, sorted(conf.dumps(env).splitlines()))
@@ -61,7 +61,7 @@ with open(CONFIG_FILENAME) as f:
 
 # test true/false/none tokens
 with open(CONFIG_FILENAME) as f:
-    env = conf.load(f, true_token=None, false_token=None, none_token=None)
+    env = conf.load(f, keywords={})
     tempenv = baseenv.copy()
     tempenv['yes'] = 'true'
     tempenv['no'] = 'false'
@@ -74,7 +74,7 @@ with open(CONFIG_FILENAME) as f:
     s = s.replace('true', 'yes')
     s = s.replace('false', 'no')
     s = s.replace('null', 'none')
-    env = conf.loads(s, true_token='yes', false_token='no', none_token='none')
+    env = conf.loads(s, keywords={'yes': True, 'no': False, 'none': None})
     compare(env, baseenv)
     compare(content, sorted(conf.dumps(env).splitlines()))
 
@@ -96,16 +96,23 @@ with open(CONFIG_FILENAME) as f:
 with open(CONFIG_FILENAME) as f:
     true = False
     try:
-        conf.load(f, strict_mode=True)
+        conf.load(f, strict=True)
     except ValueError:
         true = True
     assert true
 
-# test variable_validator
+# test key_validator
 with open(CONFIG_FILENAME) as f:
-    env = conf.load(f,
-                    variable_validator=lambda s: re.match(r'[\w_][\w\d_]*', s))
+    env = conf.load(f, key_validator=lambda s: re.match(r'[\w_][\w\d_]*', s))
     tempenv = baseenv.copy()
     del tempenv['']
     compare(env, tempenv)
     compare(content[1:], sorted(conf.dumps(env).splitlines()))
+
+# test key_separator
+with os.popen('git config --list --local') as f:
+    env = conf.load(f, key_separator='.', parse_int=float)
+    opts = dict(key_separator='->', keywords={'yes': True, 'no': False})
+    s = conf.dumps(env, **opts)
+    compare(env, conf.loads(s, **opts))
+
