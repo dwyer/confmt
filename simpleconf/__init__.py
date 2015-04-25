@@ -172,4 +172,43 @@ Here's a neat way to use nested objects to load your git config into Python.
     'refs/heads/master', 'remote': 'origin'}}}
 """
 
-from .conf import ConfDecoder, ConfEncoder, dump, dumps, load, loads
+from .conf import ConfDecoder, ConfEncoder
+
+
+def dump(obj, fp, sort_keys=False, assignment_operator=None,
+         comment_token=None, keywords=None, key_separator=None,
+         key_validator=None):
+    fp.write(dumps(
+        obj, sort_keys=sort_keys, assignment_operator=assignment_operator,
+        comment_token=comment_token, keywords=keywords,
+        key_separator=key_separator, key_validator=key_validator))
+
+
+def dumps(obj, sort_keys=False, assignment_operator=None, comment_token=None,
+          keywords=None, key_separator=None, key_validator=None):
+    encoder = ConfEncoder(
+        sort_keys=sort_keys, assignment_operator=assignment_operator,
+        comment_token=comment_token, keywords=keywords,
+        key_separator=key_separator, key_validator=key_validator)
+    return encoder.encode(obj)
+
+
+def load(fp, parse_int=None, parse_float=None, strict=False, object_type=None,
+         assignment_operator=None, comment_token=None, keywords=None,
+         key_separator=None, key_validator=None):
+    return loads(
+        fp.read(), parse_int=parse_int, parse_float=parse_float, strict=strict,
+        object_type=object_type, assignment_operator=assignment_operator,
+        comment_token=comment_token, keywords=keywords,
+        key_separator=key_separator, key_validator=key_validator)
+
+
+def loads(s, parse_int=None, parse_float=None, strict=False, object_type=None,
+          assignment_operator=None, comment_token=None, keywords=None,
+          key_separator=None, key_validator=None):
+    decoder = ConfDecoder(
+        parse_int=parse_int, parse_float=parse_float, strict=strict,
+        object_type=object_type, assignment_operator=assignment_operator,
+        comment_token=comment_token, keywords=keywords,
+        key_separator=key_separator, key_validator=key_validator)
+    return decoder.decode(s)

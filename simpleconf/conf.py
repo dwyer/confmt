@@ -5,26 +5,33 @@ _DEFAULT_KEYWORDS = {'true': True, 'false': False, 'null': None}
 
 class ConfConf(object):
 
-    def __init__(self, assignment_operator=_DEFAULT_ASSIGNMENT_OPERATOR,
-                 comment_token=_DEFAULT_COMMENT_TOKEN,
-                 keywords=_DEFAULT_KEYWORDS, key_separator=None,
-                 key_validator=None):
-        self.assignment_operator = assignment_operator
-        self.comment_token = comment_token
+    def __init__(self, assignment_operator=None, comment_token=None,
+                 keywords=None, key_separator=None, key_validator=None):
+        self.assignment_operator = (
+            _DEFAULT_ASSIGNMENT_OPERATOR if assignment_operator is None else
+            assignment_operator) 
+        self.comment_token = (
+            _DEFAULT_COMMENT_TOKEN if comment_token is None else comment_token)
+        self.keywords = _DEFAULT_KEYWORDS if keywords is None else keywords
         self.key_separator = key_separator
         self.key_validator = key_validator
-        self.keywords = _DEFAULT_KEYWORDS if keywords is None else keywords
 
 
 class ConfDecoder(ConfConf):
 
-    def __init__(self, parse_int=int, parse_float=float, strict=False,
-                 object_type=dict, **kwargs):
-        super(ConfDecoder, self).__init__(**kwargs)
-        self.parse_int = parse_int
-        self.parse_float = parse_float
+    def __init__(self, parse_int=None, parse_float=None, strict=False,
+                 object_type=None, assignment_operator=None,
+                 comment_token=None, keywords=None, key_separator=None,
+                 key_validator=None):
+        super(ConfDecoder, self).__init__(
+            assignment_operator=assignment_operator,
+            comment_token=comment_token, 
+            keywords=keywords, key_separator=key_separator,
+            key_validator=key_validator)
+        self.parse_int = parse_int or int
+        self.parse_float = parse_float or float
         self.strict = strict
-        self.object_type = object_type
+        self.object_type = object_type or dict
 
     def decode(self, s):
         obj = self.object_type()
@@ -76,8 +83,14 @@ class ConfDecoder(ConfConf):
 
 class ConfEncoder(ConfConf):
 
-    def __init__(self, sort_keys=False, **kwargs):
-        super(ConfEncoder, self).__init__(**kwargs)
+    def __init__(self, sort_keys=False, assignment_operator=None,
+                 comment_token=None, keywords=None, key_separator=None,
+                 key_validator=None):
+        super(ConfEncoder, self).__init__(
+            assignment_operator=assignment_operator,
+            comment_token=comment_token, 
+            keywords=keywords, key_separator=key_separator,
+            key_validator=key_validator)
         self.sort_keys = sort_keys
         self.separator = ' %s ' % self.assignment_operator
 
@@ -137,19 +150,3 @@ def _isa(s, t):
         return True
     except ValueError:
         return False
-
-
-def dump(obj, fp, **kwargs):
-    fp.write(dumps(obj, **kwargs))
-
-
-def dumps(obj, **kwargs):
-    return ConfEncoder(**kwargs).encode(obj)
-
-
-def load(fp, **kwargs):
-    return loads(fp.read(), **kwargs)
-
-
-def loads(s, **kwargs):
-    return ConfDecoder(**kwargs).decode(s)
