@@ -33,6 +33,15 @@ class ConfDecoder(ConfConf):
         self.strict = strict
         self.object_type = object_type or dict
 
+    def __validate_keys(self, *args):
+        if self.key_validator:
+            for key in args:
+                if not self.key_validator(key):
+                    if self.strict:
+                        raise ValueError('invalid key: %s' % repr(key))
+                    return False
+        return True
+
     def decode(self, s):
         obj = self.object_type()
         for i, line in enumerate(s.splitlines()):
@@ -47,16 +56,6 @@ class ConfDecoder(ConfConf):
                         'missing assignment operator %s on line %d: %s' % (
                             repr(self.assignment_operator), i + 1, repr(line)))
                 continue
-            key = key.strip()
-            # WARNING: key_validator is applied before the key is split with
-            # the key_separator, therefore it's the developer's
-            # responsibility to ensure that each segment of the full key path
-            # is valid. We need to decide whether to parse each key as a whole
-            # or each element individually.
-            if self.key_validator and not self.key_validator(key):
-                if self.strict:
-                    raise ValueError('invalid key: %s' % repr(key))
-                continue
             val = val.strip()
             if val in self.keywords:
                 val = self.keywords[val]
@@ -65,10 +64,11 @@ class ConfDecoder(ConfConf):
             elif _isa(val, float):
                 val = self.parse_float(val)
             if self.key_separator:
+                keys = [key.strip() for key in key.split(self.key_separator)]
+                if not self.__validate_keys(*keys):
+                    continue
                 base_obj = obj
-                keys = key.split(self.key_separator)
                 for j, key in enumerate(keys):
-                    key = key.strip()
                     if j == len(keys) - 1:
                         obj[key] = val
                         break
@@ -77,6 +77,9 @@ class ConfDecoder(ConfConf):
                     obj = obj[key]
                 obj = base_obj
             else:
+                key = key.strip()
+                if not self.__validate_keys(key):
+                    continue
                 obj[key] = val
         return obj
 

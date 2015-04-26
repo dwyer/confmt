@@ -108,6 +108,13 @@ with open(CONFIG_FILENAME) as f:
     del tempenv['']
     compare(env, tempenv)
     compare(content[1:], sorted(conf.dumps(env).splitlines()))
+    valid = lambda s: ' ' not in s
+    env = conf.loads('a.b = 1 \n a.b.c d = 2', key_separator='.',
+                     key_validator=valid)
+    assert env['a']['b'] == 1
+    env = conf.loads('a.b c.d = 1', key_separator='.', key_validator=valid)
+    assert not env
+
 
 # test key_separator
 with os.popen('git config --list --local') as f:
@@ -115,4 +122,3 @@ with os.popen('git config --list --local') as f:
     opts = dict(key_separator='->', keywords={'yes': True, 'no': False})
     s = conf.dumps(env, **opts)
     compare(env, conf.loads(s, **opts))
-
