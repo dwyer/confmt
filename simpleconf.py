@@ -195,10 +195,39 @@ _DEFAULT_KEYWORDS = {'true': True, 'false': False, 'null': None}
 
 
 class ConfConf(object):
+    """Base-class for ``ConfDecoder`` and ``ConfEncoder``.
+    """
 
     def __init__(self, assignment_operator=None, comment_token=None,
                  escape_token=None, keywords=None, key_separator=None,
                  key_validator=None):
+        """``assignment_operator`` is a ``str`` used to split and/or join
+        key/value pairs. The default value is '='.
+
+        ``comment_token`` is a ``str`` used to indicate the beginning of a
+        comment. Lines starting with this value will be ignored by the decoder.
+        Key names containing this value will raise a ``ValueError`` in the
+        encoder. The default value is '#'.
+
+        ``keywords`` is a ``dict`` mapping a series of keywords to their
+        corresponding constant primitive values. Each keyword must be a ``str``
+        and each value should be a singleton, as keyword values will be looked
+        up by the encoder using the ``is`` operator. The default value is
+        {'true': True, 'false': False, 'null': None}.
+
+        ``key_separator``, is a ``str`` used to indicate nested of
+        objects/environments. If set, the decoder will use it nest objects, and
+        the encoder will use it to serialize nested objects into a linear
+        sequence of statements. The default value is ``None``.
+
+        ``key_validator`` is a function that accepts one argument, a key name
+        ``str``, and returns a non-true value if the key name is invalid. If
+        this validation fails in the encoder, or in the decoder with strict
+        mode enabled, a ``ValueError`` will be raised. If it fails in the
+        decoder with strict mode disabled, the statment containing the invalid
+        key name will be ignored. The default value is ``None``.
+
+        """
         self.assignment_operator = (
             _DEFAULT_ASSIGNMENT_OPERATOR if assignment_operator is None else
             assignment_operator)
@@ -212,11 +241,32 @@ class ConfConf(object):
 
 
 class ConfDecoder(ConfConf):
+    """The format decoder.
+
+    """
 
     def __init__(self, parse_int=None, parse_float=None, strict=False,
                  object_type=None, assignment_operator=None,
                  comment_token=None, escape_token=None, keywords=None,
                  key_separator=None, key_validator=None):
+        """``parse_int`` is a function that accepts one argument, the ``str``
+        representation of an integer to be decoded, and returns a parsed
+        value. The default value is ``int``.
+
+        ``parse_float`` is a function that accepts one argument, the ``str``
+        representation of a real number to be decoded, and returns a parsed
+        value. The default value is ``float``.
+
+        ``strict``, if true, will cause the decoder to raise a ``ValueError``
+        when an invalid statment is encounted. The default value is ``False``.
+
+        ``object_type``, is a class or function that takes no arguments and
+        returns the initial value of the object/environment to be returned.
+        The default value is ``dict``.
+
+        See ``ConfConf`` for definitions of other parameters.
+
+        """
         super(ConfDecoder, self).__init__(
             assignment_operator=assignment_operator,
             comment_token=comment_token,
@@ -315,10 +365,19 @@ class ConfDecoder(ConfConf):
 
 
 class ConfEncoder(ConfConf):
+    """The format encoder.
+
+    """
 
     def __init__(self, sort_keys=False, assignment_operator=None,
                  comment_token=None, escape_token=None, keywords=None,
                  key_separator=None, key_validator=None):
+        """``sort_keys``, if true, will encode all key/value pairs in sorted
+        order. The default value is false.
+
+        See ``ConfConf`` for definitions of other parameters.
+
+        """
         super(ConfEncoder, self).__init__(
             assignment_operator=assignment_operator,
             comment_token=comment_token,
