@@ -11,7 +11,7 @@ class ConfConf(object):
                  key_validator=None):
         self.assignment_operator = (
             _DEFAULT_ASSIGNMENT_OPERATOR if assignment_operator is None else
-            assignment_operator) 
+            assignment_operator)
         self.comment_token = (
             _DEFAULT_COMMENT_TOKEN if comment_token is None else comment_token)
         self.escape_token = (
@@ -29,7 +29,7 @@ class ConfDecoder(ConfConf):
                  key_separator=None, key_validator=None):
         super(ConfDecoder, self).__init__(
             assignment_operator=assignment_operator,
-            comment_token=comment_token, 
+            comment_token=comment_token,
             keywords=keywords, key_separator=key_separator,
             key_validator=key_validator, escape_token=escape_token)
         self.parse_int = parse_int or int
@@ -131,7 +131,7 @@ class ConfEncoder(ConfConf):
                  key_separator=None, key_validator=None):
         super(ConfEncoder, self).__init__(
             assignment_operator=assignment_operator,
-            comment_token=comment_token, 
+            comment_token=comment_token,
             keywords=keywords, key_separator=key_separator,
             key_validator=key_validator, escape_token=escape_token)
         self.sort_keys = sort_keys
@@ -200,3 +200,47 @@ def _isa(s, t):
         return True
     except ValueError:
         return False
+
+
+def dump(obj, fp, sort_keys=False, assignment_operator=None,
+         comment_token=None, escape_token=None, keywords=None,
+         key_separator=None, key_validator=None):
+    fp.write(dumps(
+        obj, sort_keys=sort_keys, assignment_operator=assignment_operator,
+        comment_token=comment_token, escape_token=escape_token,
+        keywords=keywords, key_separator=key_separator,
+        key_validator=key_validator))
+
+
+def dumps(obj, sort_keys=False, assignment_operator=None, comment_token=None,
+          escape_token=None, keywords=None, key_separator=None,
+          key_validator=None):
+    encoder = ConfEncoder(
+        sort_keys=sort_keys, assignment_operator=assignment_operator,
+        comment_token=comment_token, escape_token=escape_token,
+        keywords=keywords, key_separator=key_separator,
+        key_validator=key_validator)
+    return encoder.encode(obj)
+
+
+def load(fp, parse_int=None, parse_float=None, strict=False, object_type=None,
+         assignment_operator=None, comment_token=None, escape_token=None,
+         keywords=None, key_separator=None, key_validator=None):
+    return loads(
+        fp.read(), parse_int=parse_int, parse_float=parse_float, strict=strict,
+        object_type=object_type, assignment_operator=assignment_operator,
+        comment_token=comment_token, escape_token=escape_token,
+        keywords=keywords, key_separator=key_separator,
+        key_validator=key_validator)
+
+
+def loads(s, parse_int=None, parse_float=None, strict=False, object_type=None,
+          assignment_operator=None, comment_token=None, escape_token=None,
+          keywords=None, key_separator=None, key_validator=None):
+    decoder = ConfDecoder(
+        parse_int=parse_int, parse_float=parse_float, strict=strict,
+        object_type=object_type, assignment_operator=assignment_operator,
+        comment_token=comment_token, escape_token=escape_token,
+        keywords=keywords, key_separator=key_separator,
+        key_validator=key_validator)
+    return decoder.decode(s)
