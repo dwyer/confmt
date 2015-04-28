@@ -2,13 +2,15 @@ simpleconf is a very simple and easy data-interchange format for
 configuration files. It's a subset of JSON, supporting everything but arrays,
 but with significantly simpler syntax.
 
-Audience:
+Audience
+========
 
 Developers who need a user-facing configuration file format that's easy to read
 and write, who don't need arrays so may therefore exchange the power of JSON or
 YAML for a much simpler, almost syntax-free format.
 
-Format Syntax:
+Format Syntax
+=============
 
     * A statement is a key/value pair separated by an assignment operator (= by
       default).
@@ -19,21 +21,21 @@ Format Syntax:
       operator, which can only be changed).
     * Support for nested objects/environments is optional.
 
-Deserialization:
+Deserialization
+===============
 
 Note: The following examples apply to the ``ConfDecoder``, ``load`` and
 ``loads`` class and functions.
 
-    >>> import sys; sys.ps2 = ' ' * 4
     >>> import simpleconf as conf
     >>> conf.loads('''
-
-        # this is a comment
-
-        # the following is a statement
-        energy = mass times the speed of light squared
-
-        ''')
+    ...
+    ... # this is a comment
+    ...
+    ... # the following is a statement
+    ... energy = mass times the speed of light squared
+    ...
+    ... ''')
     {'energy': 'mass times the speed of light squared'}
 
 Only the first assignment operator is evaluated.
@@ -44,26 +46,26 @@ Only the first assignment operator is evaluated.
 Numbers, booleans and "null" evaluate to their primitive counterparts.
 
     >>> conf.loads('''
-
-        answer = 42
-        phish = 1.618
-        yes = true
-        no = false
-        maybe = null
-
-        ''')
+    ...
+    ... answer = 42
+    ... phish = 1.618
+    ... yes = true
+    ... no = false
+    ... maybe = null
+    ...
+    ... ''')
     {'answer': 42, 'maybe': None, 'yes': True, 'phish': 1.618, 'no': False}
 
 Key names evaluate to strings and can contain any character except the
 assignment operator.
 
     >>> conf.loads('''
-
-        two birds = 2
-        one stone = 1
-        three's a "crowd"? = true
-
-        ''')
+    ...
+    ... two birds = 2
+    ... one stone = 1
+    ... three's a "crowd"? = true
+    ...
+    ... ''')
     {'one stone': 1, 'two birds': 2, 'three's a "crowd"?': True}
 
 The deserialized object is a ``dict`` by default, but can be configured with
@@ -72,10 +74,12 @@ preserve the order.
 
     >>> import collections
     >>> conf.loads('''
-        one = 1
-        two = 2
-        tree = 3
-        ''', object_type=collections.OrderedDict)
+    ...
+    ... one = 1
+    ... two = 2
+    ... tree = 3
+    ...
+    ... ''', object_type=collections.OrderedDict)
     OrderedDict([(u'one', 1), (u'two', 2), (u'tree', 3)])
 
 Numbers are deserialized to ``int`` and ``float`` by default, but can be
@@ -83,12 +87,15 @@ configured with the ``parse_int`` and ``parse_float`` arguments.
 
     >>> import decimal
     >>> conf.loads('''
-        answer = 42
-        phish = 1.618
-        ''', parse_int=float, parse_float=decimal.Decimal)
+    ...
+    ... answer = 42
+    ... phish = 1.618
+    ...
+    ... ''', parse_int=float, parse_float=decimal.Decimal)
     {'answer': 42.0, 'phish': Decimal('1.618')}
 
-Syntax Configuration:
+Syntax Configuration
+====================
 
 Note: the following examples apply to all classes and functions.
 
@@ -96,12 +103,12 @@ The assignment operator can be overloaded with the ``assignment_operator``
 argument.
 
     >>> conf.loads('''
-
-        a: 1
-        b: 52
-        this = key: value
-
-        ''', assignment_operator=':')
+    ...
+    ... a: 1
+    ... b: 52
+    ... this = key: value
+    ...
+    ... ''', assignment_operator=':')
     {'a': 1, 'this = key': 'value', 'b': 52}
 
     >>> print conf.dumps(_, assignment_operator=':')
@@ -114,14 +121,13 @@ with the ``keywords`` argument to ``load`` and ``loads``.
 
     >>> keywords = {'yes': True, 'no': False, 'none': None}
     >>> conf.loads('''
-
-        yep = yes
-        nah = no
-        meh = none
-
-        ''', keywords=keywords)
+    ...
+    ... yep = yes
+    ... nah = no
+    ... meh = none
+    ...
+    ... ''', keywords=keywords)
     {'yep': True, 'nah': False, 'meh': None}
-
     >>> print conf.dumps(_, keywords=keywords)
     yep = yes
     nah = no
@@ -130,11 +136,11 @@ with the ``keywords`` argument to ``load`` and ``loads``.
 The comment token can be overloaded with the ``comment_token`` argument.
 
     >>> conf.loads('''
-
-        // this = comment
-        # this = not a comment
-
-        ''', comment_token='//')
+    ...
+    ... // this = comment
+    ... # this = not a comment
+    ...
+    ... ''', comment_token='//')
     {'# this': 'not a comment'}
 
 Nested objects are optionally supported by setting the ``key_separator``
@@ -147,11 +153,11 @@ argument.
 
 Here's a neat way to use nested objects to load your git config into Python.
 
-    import os
+    >>> import os
     >>> with os.popen('git config --list --local') as fp:
-            s = fp.read()
-            print s
-       
+    ...     s = fp.read()
+    ...     print s
+    ...
     core.repositoryformatversion=0
     core.filemode=true
     core.bare=false
@@ -162,7 +168,6 @@ Here's a neat way to use nested objects to load your git config into Python.
     remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
     branch.master.remote=origin
     branch.master.merge=refs/heads/master
-
     >>> conf.loads(_, key_separator='.')
     {'core': {'logallrefupdates': True, 'precomposeunicode': True,
     'ignorecase': True, 'bare': False, 'filemode': True,

@@ -2,5 +2,5 @@
 
 import simpleconf as conf
 
-with open('README', 'w') as fp:
+with open('README.rst', 'w') as fp:
     fp.write(conf.__doc__)
