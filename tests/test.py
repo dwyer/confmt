@@ -6,19 +6,21 @@ import os
 import re
 import sys
 
+import simpleconf as conf
+
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(TESTS_DIR)
 CONFIG_FILENAME = os.path.join(TESTS_DIR, 'test.conf')
 
 sys.path.insert(0, PARENT_DIR)
 
-import simpleconf as conf
-
 baseenv = None
 content = None
 
+
 def compare(a, b):
     assert a == b, 'no match: %s' % '\n'.join(map(str, (a, b)))
+
 
 # test defaults
 with open(CONFIG_FILENAME) as f:
@@ -108,7 +110,10 @@ with open(CONFIG_FILENAME) as f:
     del tempenv['']
     compare(env, tempenv)
     compare(content[1:], sorted(conf.dumps(env).splitlines()))
-    valid = lambda s: ' ' not in s
+
+    def valid(s):
+        return ' ' not in s
+
     env = conf.loads('a.b = 1 \n a.b.c d = 2', key_separator='.',
                      key_validator=valid)
     assert env['a']['b'] == 1
@@ -124,13 +129,13 @@ with os.popen('git config --list --local') as f:
 
 # test escape_token
 s = 'a \= b = \#t # this should be #t'
-keywords={'#t': True, '#f': False}
+keywords = {'#t': True, '#f': False}
 obj = conf.loads(s, keywords=keywords)
 assert 'a = b' in obj and obj['a = b'] is True, obj
 t = conf.dumps({'a = b': True}, keywords=keywords)
 assert s.startswith(t), (s, t)
 
-obj = conf.loads('a.b = \#t \n a\.b = \#f',
-                 keywords=keywords, key_separator='.')
+obj = conf.loads('a.b = \#t \n a\.b = \#f', keywords=keywords,
+                 key_separator='.')
 assert 'a' in obj and 'b' in obj['a'] and obj['a']['b'] is True, obj
 assert 'a.b' in obj and obj['a.b'] is False, obj

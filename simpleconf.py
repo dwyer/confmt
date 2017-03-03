@@ -228,13 +228,13 @@ class ConfConf(object):
         key name will be ignored. The default value is ``None``.
 
         """
-        self.assignment_operator = (
-            _DEFAULT_ASSIGNMENT_OPERATOR if assignment_operator is None else
-            assignment_operator)
-        self.comment_token = (
-            _DEFAULT_COMMENT_TOKEN if comment_token is None else comment_token)
-        self.escape_token = (
-            _DEFAULT_ESCAPE_TOKEN if escape_token is None else escape_token)
+        self.assignment_operator = (_DEFAULT_ASSIGNMENT_OPERATOR
+                                    if assignment_operator is None else
+                                    assignment_operator)
+        self.comment_token = (_DEFAULT_COMMENT_TOKEN
+                              if comment_token is None else comment_token)
+        self.escape_token = (_DEFAULT_ESCAPE_TOKEN
+                             if escape_token is None else escape_token)
         self.keywords = _DEFAULT_KEYWORDS if keywords is None else keywords
         self.key_separator = key_separator
         self.key_validator = key_validator
@@ -269,9 +269,9 @@ class ConfDecoder(ConfConf):
         """
         super(ConfDecoder, self).__init__(
             assignment_operator=assignment_operator,
-            comment_token=comment_token,
-            keywords=keywords, key_separator=key_separator,
-            key_validator=key_validator, escape_token=escape_token)
+            comment_token=comment_token, keywords=keywords,
+            key_separator=key_separator, key_validator=key_validator,
+            escape_token=escape_token)
         self.parse_int = parse_int or int
         self.parse_float = parse_float or float
         self.strict = strict
@@ -287,7 +287,7 @@ class ConfDecoder(ConfConf):
         chrs = []
         i = 0
         while i < len(s):
-            if s[i:i+len(sep)] == sep:
+            if s[i:i + len(sep)] == sep:
                 toks.append(''.join(chrs))
                 i += len(sep)
                 if maxsplit > -1:
@@ -296,7 +296,7 @@ class ConfDecoder(ConfConf):
                         chrs = s[i:]
                         break
                 chrs = []
-            elif s[i:i+len(esep)] == esep:
+            elif s[i:i + len(esep)] == esep:
                 chrs.append(sep)
                 i += len(esep)
             else:
@@ -380,9 +380,9 @@ class ConfEncoder(ConfConf):
         """
         super(ConfEncoder, self).__init__(
             assignment_operator=assignment_operator,
-            comment_token=comment_token,
-            keywords=keywords, key_separator=key_separator,
-            key_validator=key_validator, escape_token=escape_token)
+            comment_token=comment_token, keywords=keywords,
+            key_separator=key_separator, key_validator=key_validator,
+            escape_token=escape_token)
         self.sort_keys = sort_keys
         self.separator = ' %s ' % self.assignment_operator
 
@@ -454,11 +454,12 @@ def _isa(s, t):
 def dump(obj, fp, sort_keys=False, assignment_operator=None,
          comment_token=None, escape_token=None, keywords=None,
          key_separator=None, key_validator=None):
-    fp.write(dumps(
-        obj, sort_keys=sort_keys, assignment_operator=assignment_operator,
-        comment_token=comment_token, escape_token=escape_token,
-        keywords=keywords, key_separator=key_separator,
-        key_validator=key_validator))
+    fp.write(
+        dumps(obj, sort_keys=sort_keys,
+              assignment_operator=assignment_operator,
+              comment_token=comment_token, escape_token=escape_token,
+              keywords=keywords, key_separator=key_separator,
+              key_validator=key_validator))
 
 
 def dumps(obj, sort_keys=False, assignment_operator=None, comment_token=None,
@@ -475,12 +476,12 @@ def dumps(obj, sort_keys=False, assignment_operator=None, comment_token=None,
 def load(fp, parse_int=None, parse_float=None, strict=False, object_type=None,
          assignment_operator=None, comment_token=None, escape_token=None,
          keywords=None, key_separator=None, key_validator=None):
-    return loads(
-        fp.read(), parse_int=parse_int, parse_float=parse_float, strict=strict,
-        object_type=object_type, assignment_operator=assignment_operator,
-        comment_token=comment_token, escape_token=escape_token,
-        keywords=keywords, key_separator=key_separator,
-        key_validator=key_validator)
+    return loads(fp.read(), parse_int=parse_int, parse_float=parse_float,
+                 strict=strict, object_type=object_type,
+                 assignment_operator=assignment_operator,
+                 comment_token=comment_token, escape_token=escape_token,
+                 keywords=keywords, key_separator=key_separator,
+                 key_validator=key_validator)
 
 
 def loads(s, parse_int=None, parse_float=None, strict=False, object_type=None,
