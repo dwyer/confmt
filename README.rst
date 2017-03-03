@@ -116,8 +116,8 @@ argument.
     this = key : value
     b : 52
 
-The keywords corresponding to ``True``, ``False`` and ``None`` can be overloaded
-with the ``keywords`` argument to ``load`` and ``loads``.
+The keywords corresponding to ``True``, ``False`` and ``None`` can be
+overloaded with the ``keywords`` argument to ``load`` and ``loads``.
 
     >>> keywords = {'yes': True, 'no': False, 'none': None}
     >>> conf.loads("""
@@ -156,8 +156,8 @@ Here's a neat way to use nested objects to load your git config into Python.
     >>> import os
     >>> with os.popen('git config --list --local') as fp:
     ...     s = fp.read()
-    ...     print s
     ...
+    >>> print s
     core.repositoryformatversion=0
     core.filemode=true
     core.bare=false
@@ -168,6 +168,7 @@ Here's a neat way to use nested objects to load your git config into Python.
     remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
     branch.master.remote=origin
     branch.master.merge=refs/heads/master
+
     >>> conf.loads(_, key_separator='.')
     {'core': {'logallrefupdates': True, 'precomposeunicode': True,
     'ignorecase': True, 'bare': False, 'filemode': True,
