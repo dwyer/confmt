@@ -27,8 +27,8 @@ Deserialization
 Note: The following examples apply to the ``ConfDecoder``, ``load`` and
 ``loads`` class and functions.
 
-    >>> import simpleconf as conf
-    >>> conf.loads("""
+    >>> import simpleconf
+    >>> simpleconf.loads("""
     ...
     ... # this is a comment
     ...
@@ -40,12 +40,12 @@ Note: The following examples apply to the ``ConfDecoder``, ``load`` and
 
 Only the first assignment operator is evaluated.
 
-    >>> conf.loads('relativity = e = mc^2')
+    >>> simpleconf.loads('relativity = e = mc^2')
     {'relativity': 'e = mc^2'}
 
 Numbers, booleans and "null" evaluate to their primitive counterparts.
 
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... answer = 42
     ... phish = 1.618
@@ -59,7 +59,7 @@ Numbers, booleans and "null" evaluate to their primitive counterparts.
 Key names evaluate to strings and can contain any character except the
 assignment operator.
 
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... two birds = 2
     ... one stone = 1
@@ -73,7 +73,7 @@ the ``object_type`` argument. For example, you could use an OrderedDict to
 preserve the order.
 
     >>> import collections
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... one = 1
     ... two = 2
@@ -86,7 +86,7 @@ Numbers are deserialized to ``int`` and ``float`` by default, but can be
 configured with the ``parse_int`` and ``parse_float`` arguments.
 
     >>> import decimal
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... answer = 42
     ... phish = 1.618
@@ -102,7 +102,7 @@ Note: the following examples apply to all classes and functions.
 The assignment operator can be overloaded with the ``assignment_operator``
 argument.
 
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... a: 1
     ... b: 52
@@ -111,7 +111,7 @@ argument.
     ... """, assignment_operator=':')
     {'a': 1, 'this = key': 'value', 'b': 52}
 
-    >>> print conf.dumps(_, assignment_operator=':')
+    >>> print simpleconf.dumps(_, assignment_operator=':')
     a : 1
     this = key : value
     b : 52
@@ -120,7 +120,7 @@ The keywords corresponding to ``True``, ``False`` and ``None`` can be
 overloaded with the ``keywords`` argument to ``load`` and ``loads``.
 
     >>> keywords = {'yes': True, 'no': False, 'none': None}
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... yep = yes
     ... nah = no
@@ -128,14 +128,14 @@ overloaded with the ``keywords`` argument to ``load`` and ``loads``.
     ...
     ... """, keywords=keywords)
     {'yep': True, 'nah': False, 'meh': None}
-    >>> print conf.dumps(_, keywords=keywords)
+    >>> print simpleconf.dumps(_, keywords=keywords)
     yep = yes
     nah = no
     meh = none
 
 The comment token can be overloaded with the ``comment_token`` argument.
 
-    >>> conf.loads("""
+    >>> simpleconf.loads("""
     ...
     ... // this = comment
     ... # this = not a comment
@@ -146,7 +146,8 @@ The comment token can be overloaded with the ``comment_token`` argument.
 Nested objects are optionally supported by setting the ``key_separator``
 argument.
 
-    >>> print conf.dumps({'a': 1, 'b': {'c': 3, 'd': 4}}, key_separator='::')
+    >>> print simpleconf.dumps({'a': 1, 'b': {'c': 3, 'd': 4}},
+                               key_separator='::')
     a = 1
     b::c = 3
     b::d = 4
@@ -169,7 +170,7 @@ Here's a neat way to use nested objects to load your git config into Python.
     branch.master.remote=origin
     branch.master.merge=refs/heads/master
 
-    >>> conf.loads(_, key_separator='.')
+    >>> simpleconf.loads(_, key_separator='.')
     {'core': {'logallrefupdates': True, 'precomposeunicode': True,
     'ignorecase': True, 'bare': False, 'filemode': True,
     'repositoryformatversion': 0}, 'remote': {'origin': {'url':
