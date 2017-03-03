@@ -179,6 +179,11 @@ Here's a neat way to use nested objects to load your git config into Python.
     'refs/heads/master', 'remote': 'origin'}}}
 """
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 _DEFAULT_ASSIGNMENT_OPERATOR = '='
 _DEFAULT_COMMENT_TOKEN = '#'
 _DEFAULT_ESCAPE_TOKEN = '\\'
