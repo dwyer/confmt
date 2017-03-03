@@ -28,14 +28,14 @@ Note: The following examples apply to the ``ConfDecoder``, ``load`` and
 ``loads`` class and functions.
 
     >>> import simpleconf as conf
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... # this is a comment
     ...
     ... # the following is a statement
     ... energy = mass times the speed of light squared
     ...
-    ... ''')
+    ... """)
     {'energy': 'mass times the speed of light squared'}
 
 Only the first assignment operator is evaluated.
@@ -45,7 +45,7 @@ Only the first assignment operator is evaluated.
 
 Numbers, booleans and "null" evaluate to their primitive counterparts.
 
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... answer = 42
     ... phish = 1.618
@@ -53,19 +53,19 @@ Numbers, booleans and "null" evaluate to their primitive counterparts.
     ... no = false
     ... maybe = null
     ...
-    ... ''')
+    ... """)
     {'answer': 42, 'maybe': None, 'yes': True, 'phish': 1.618, 'no': False}
 
 Key names evaluate to strings and can contain any character except the
 assignment operator.
 
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... two birds = 2
     ... one stone = 1
     ... three's a "crowd"? = true
     ...
-    ... ''')
+    ... """)
     {'one stone': 1, 'two birds': 2, 'three's a "crowd"?': True}
 
 The deserialized object is a ``dict`` by default, but can be configured with
@@ -73,25 +73,25 @@ the ``object_type`` argument. For example, you could use an OrderedDict to
 preserve the order.
 
     >>> import collections
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... one = 1
     ... two = 2
     ... tree = 3
     ...
-    ... ''', object_type=collections.OrderedDict)
+    ... """, object_type=collections.OrderedDict)
     OrderedDict([(u'one', 1), (u'two', 2), (u'tree', 3)])
 
 Numbers are deserialized to ``int`` and ``float`` by default, but can be
 configured with the ``parse_int`` and ``parse_float`` arguments.
 
     >>> import decimal
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... answer = 42
     ... phish = 1.618
     ...
-    ... ''', parse_int=float, parse_float=decimal.Decimal)
+    ... """, parse_int=float, parse_float=decimal.Decimal)
     {'answer': 42.0, 'phish': Decimal('1.618')}
 
 Syntax Configuration
@@ -102,13 +102,13 @@ Note: the following examples apply to all classes and functions.
 The assignment operator can be overloaded with the ``assignment_operator``
 argument.
 
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... a: 1
     ... b: 52
     ... this = key: value
     ...
-    ... ''', assignment_operator=':')
+    ... """, assignment_operator=':')
     {'a': 1, 'this = key': 'value', 'b': 52}
 
     >>> print conf.dumps(_, assignment_operator=':')
@@ -120,13 +120,13 @@ The keywords corresponding to ``True``, ``False`` and ``None`` can be overloaded
 with the ``keywords`` argument to ``load`` and ``loads``.
 
     >>> keywords = {'yes': True, 'no': False, 'none': None}
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... yep = yes
     ... nah = no
     ... meh = none
     ...
-    ... ''', keywords=keywords)
+    ... """, keywords=keywords)
     {'yep': True, 'nah': False, 'meh': None}
     >>> print conf.dumps(_, keywords=keywords)
     yep = yes
@@ -135,12 +135,12 @@ with the ``keywords`` argument to ``load`` and ``loads``.
 
 The comment token can be overloaded with the ``comment_token`` argument.
 
-    >>> conf.loads('''
+    >>> conf.loads("""
     ...
     ... // this = comment
     ... # this = not a comment
     ...
-    ... ''', comment_token='//')
+    ... """, comment_token='//')
     {'# this': 'not a comment'}
 
 Nested objects are optionally supported by setting the ``key_separator``
